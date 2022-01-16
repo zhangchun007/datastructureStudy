@@ -1,131 +1,93 @@
 package com.jimmy.android.datastructurestudy.leetcode;
 
 import org.junit.Test;
-import org.w3c.dom.Node;
 
-import java.util.ArrayList;
-import java.util.List;
 
 /**
- * 二叉树的中序遍历
- * 示例：
- * 1 、
- * 输入：root=[1,null,2,3]
- * 输出：[1,3,2]
+ * 环形列表
  * <p>
- * 2 、
- * 输入：root=[]
- * 输出：[]
+ * 如果链表中有某个节点，可以通过连续跟踪 next 指针再次到达，则链表中存在环。
+ * 为了表示给定链表中的环，评测系统内部使用整数 pos 来表示链表尾连接到链表中的位置（索引从 0 开始）。
+ * 如果 pos 是 -1，则在该链表中没有环。注意：pos 不作为参数进行传递，仅仅是为了标识链表的实际情况。
  * <p>
+ * 不允许修改 链表。
  * <p>
- * 3、
- * 输入：root=[1]
- * 输出：[1]
- * <p>
- * 4、
- * 输入：root=[1,2]
- * 输出：[2,1]
- * <p>
- * 5、
- * 输入：root=[1,null,2]
- * 输出：[1,2]
+ * 来源：力扣（LeetCode）
+ * 链接：https://leetcode-cn.com/problems/linked-list-cycle-ii
+ * 著作权归领扣网络所有。商业转载请联系官方授权，非商业转载请注明出处。
  *
  * @return
  */
 public class ExampleUnitTest3 {
     @Test
     public void addition_isCorrect() {
-        TreeNode node1 = new TreeNode(1, null, null);
-        TreeNode node2 = new TreeNode(2, null, null);
-        TreeNode node3 = new TreeNode(3, null, null);
+        ListNode node1 = new ListNode(3);
+        ListNode node2 = new ListNode(2);
+        ListNode node3 = new ListNode(0);
+        ListNode node4 = new ListNode(-4);
 
-        node1.right = node2;
-        node2.left = node3;
+        node1.next = node2;
+        node2.next = node3;
+        node3.next = node4;
+        node4.next = node2;
 
-        //二叉树中序遍历
-        inorderTraversal(node1, "mid");
-
-        //二叉树前序遍历
-        inorderTraversal(node1, "pre");
-
-        //二叉树前序遍历
-        inorderTraversal(node1, "post");
-
-
-    }
-
-    public List<Integer> inorderTraversal(TreeNode root, String type) {
-        List<Integer> res = new ArrayList<>();
-        if (type == "mid") {
-            midOrder(root, res);
-        } else if (type == "pre") {
-            preOrderTraverse(root, res);
-        } else if (type == "post") {
-            postOrderTraverse(root, res);
-        }
-        return res;
+        ListNode cycle = detectCycle(node1);
+        System.out.println("环形列表：==" + cycle.val);
     }
 
     /**
-     * 二叉树中序遍历
+     * 思路与算法
+     * <p>
+     * 我们使用两个指针，fast 与 slow。它们起始都位于链表的头部。随后，slow 指针每次向后移动一个位置，而 fast 指针向后移动两个位置。
+     * 如果链表中存在环，则fast 指针最终将再次与 slow 指针在环中相遇。
+     * <p>
+     * <p>
+     * 根据题意，任意时刻，fast 指针走过的距离都为 slow 指针的 2 倍。因此，我们有
+     * a+(n+1)b+nc=2(a+b)⟹a=c+(n−1)(b+c)
+     * <p>
+     * 有了 a=c+(n-1)(b+c)a=c+(n−1)(b+c) 的等量关系，我们会发现：从相遇点到入环点的距离加上 n-1n−1 圈的环长，恰好等于从链表头部到入环点的距离。
+     * <p>
+     * 因此，当发现 slow 与 fast 相遇时，我们再额外使用一个指针 tr。起始，它指向链表头部；随后，它和 slow 每次向后移动一个位置。最终，它们会在入环点相遇。
      *
-     * @param root
-     * @param res
+     * @param head
+     * @return
      */
-    private void midOrder(TreeNode root, List<Integer> res) {
-        if (root == null) {
-            return;
-        }
-        midOrder(root.left, res);
-        res.add(root.val);
-        System.out.println("二叉树的中序遍历：==" + root.val);
-        midOrder(root.right, res);
-    }
+    public ListNode detectCycle(ListNode head) {
 
-    /**
-     * 二叉树中序遍历
-     *
-     * @param root
-     * @param res
-     */
-    private void preOrderTraverse(TreeNode root, List<Integer> res) {
-        if (root == null) {
-            return;
+        if (head == null) {
+            return null;
         }
-        System.out.println("pre:" + root.val);
-        preOrderTraverse(root.left, res);
-        preOrderTraverse(root.right, res);
-    }
 
-    /**
-     * 后序访问树的所有节点
-     */
-    public void postOrderTraverse(TreeNode root, List<Integer> res) {
-        if (root == null) {
-            return;
+        ListNode slow = head, fast = head;
+        while (fast != null) {
+            slow = slow.next;
+            if (fast.next != null) {
+                fast = fast.next.next;
+            } else {
+                return null;
+            }
+            if (fast == slow) {
+                ListNode ptr = head;
+                while (ptr != slow) {
+                    ptr = ptr.next;
+                    slow = slow.next;
+                }
+                return ptr;
+            }
         }
-        postOrderTraverse(root.left,res);
-        postOrderTraverse(root.right,res);
-        System.out.println("post:" + root.val);
+
+        return null;
+
     }
 
 
-    public class TreeNode {
+    class ListNode {
         int val;
-        TreeNode left;
-        TreeNode right;
+        ListNode next;
 
-        TreeNode() {
-        }
-
-        TreeNode(int val) {
-            this.val = val;
-        }
-
-        TreeNode(int val, TreeNode left, TreeNode right) {
-            this.val = val;
-            this.left = left;
-            this.right = right;
+        ListNode(int x) {
+            val = x;
+            next = null;
         }
     }
 
